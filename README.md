@@ -1,5 +1,5 @@
 # FAB_expr
-> 论文&lt;&lt;A Dynamic Bidding Strategy Based on Model-free Reinforcement Learning in Display Advertising>>的代码
+> 论文《A Dynamic Bidding Strategy Based on Model-free Reinforcement Learning in Display Advertising》的代码
 
 # 代码运行
 > 1. 在根目录创建data/ipinyou/1458或者data/ipinyou/3427目录，并将依据[make-ipinyou-data](https://github.com/wnzhang/make-ipinyou-data)库得到的1458或者3427广告活动的train.log.txt和test.log.txt存入对应目录
