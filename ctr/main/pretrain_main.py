@@ -1,13 +1,11 @@
 import pandas as pd
 import numpy as np
-import tqdm
 import datetime
 import os
-import argparse
 import random
 from sklearn.metrics import roc_auc_score
-import RLIB.models.p_model as Model
-import RLIB.models.ctr_data as Data
+import ctr.models.p_model as Model
+import ctr.models.ctr_data as Data
 
 import torch
 import torch.nn as nn
@@ -15,12 +13,10 @@ import torch.utils.data
 
 import logging
 import sys
-import math
 
 import threading
-import time
 
-from RLIB.config import config
+from ctr.config import config
 from itertools import islice
 
 def setup_seed(seed):
@@ -220,9 +216,10 @@ class ctrThread(threading.Thread):
         except Exception:
             return None
 
+
 # 用于预训练传统预测点击率模型
 if __name__ == '__main__':
-    campaign_id = '3427/' # 1458, 3358, 3386, 3427, avazu
+    campaign_id = '1458/' # 1458, 3427
     args = config.init_parser(campaign_id)
 
     train_data, val_data, test_data, field_nums, feature_nums = get_dataset(args)
@@ -263,7 +260,6 @@ if __name__ == '__main__':
 
     device = torch.device(args.device)  # 指定运行设备
 
-    # choose_models = model_list[np.random.choice(len(model_list), 5, replace=False)]
     choose_models = [args.ctr_model_name]
     logger.info(campaign_id)
     logger.info('Models ' + ','.join(choose_models) + ' have been trained')
@@ -293,10 +289,10 @@ if __name__ == '__main__':
         test_predict_arr_dicts[model_name].append(current_model_test_predicts)
 
     for key in test_predict_arr_dicts.keys():
-        submission_path = args.data_path + args.dataset_name + args.campaign_id + key + '/' + args.model_name + '/'  # ctr 预测结果存放文件夹位置
+        submission_path = args.data_path + args.dataset_name + args.campaign_id + key + '/ctr/'  # ctr 预测结果存放文件夹位置
 
         sub_dirs = [args.data_path + args.dataset_name + args.campaign_id + key + '/',
-                    args.data_path + args.dataset_name + args.campaign_id + key + '/' + args.model_name + '/']
+                    args.data_path + args.dataset_name + args.campaign_id + key + '/ctr/']
         for sub_dir in sub_dirs:
             if not os.path.exists(sub_dir):
                 os.mkdir(sub_dir)
@@ -326,7 +322,6 @@ if __name__ == '__main__':
     test_ctrs = ctr_model(torch.LongTensor(test_data[:, 4:]).to(args.device)).detach().cpu().numpy() # 12
     
     # click + winning price + hour + timestamp + encode
-
     train_data = {'clk': val_data[:, 0].tolist(), 'ctr': val_ctrs.flatten().tolist(), 'mprice': val_data[:, 1].tolist(),
                   'hour': val_data[:, 2].tolist(), 'time_frac': val_data[:, 3].tolist()}
 

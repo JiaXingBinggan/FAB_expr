@@ -251,20 +251,11 @@ def to_libsvm_encode(datapath, sample_type, time_frac_dict):
     fo.close()
 
 
-def rand_sample(data_path):
-    test_data = pd.read_csv(data_path + 'test.bid.all.csv')
-
-    sample_indexs = sorted(random.sample(range(len(test_data)), int(len(test_data) * 0.7)))
-
-    test_all_sample_data = test_data.iloc[sample_indexs, :]
-
-    test_all_sample_data.to_csv(data_path + 'test.bid.rand.csv', index=None)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', default='../../data/')
-    parser.add_argument('--dataset_name', default='ipinyou/', help='ipinyou, cretio, yoyi')
-    parser.add_argument('--campaign_id', default='3427/', help='1458, 3358, 3386, 3427')
+    parser.add_argument('--dataset_name', default='ipinyou/', help='ipinyou')
+    parser.add_argument('--campaign_id', default='1458/', help='1458, 3427')
     parser.add_argument('--is_to_csv', default=True)
 
     setup_seed(1)
@@ -282,29 +273,52 @@ if __name__ == '__main__':
             count += 1
         time_frac_dict.setdefault(i, hour_frac_dict)
 
-    # if args.is_to_csv:
-    #     print('to csv')
-    #     day_indexs = pd.read_csv(data_path + 'day_indexs.csv', header=None).values.astype(int)
-    #     train_indexs = day_indexs[day_indexs[:, 0] == 11][0]
-    #     test_indexs = day_indexs[day_indexs[:, 0] == 12][0]
-    #
-    #     origin_train_data = pd.read_csv(data_path + 'train.all.origin.csv')
-    #
-    #     train_data = origin_train_data.iloc[:train_indexs[1], :] # 6-10
-    #     val_data = origin_train_data.iloc[train_indexs[1]: train_indexs[2] + 1, :] # 11
-    #     test_data = origin_train_data.iloc[train_indexs[2]:, :] # 12
-    #
-    #     train_data.to_csv(data_path + 'train.bid.all.csv', index=None)
-    #     val_data.to_csv(data_path + 'val.bid.all.csv', index=None)
-    #     test_data.to_csv(data_path + 'test.bid.all.csv', index=None)
-    #
-    # # no sample
-    # to_libsvm_encode(data_path, 'all', time_frac_dict)
+    if args.is_to_csv:
+        print('to csv')
+        file_name = 'train.log.txt'
+        data_path = args.data_path + args.dataset_name + args.campaign_id
 
-    # rand denotes random sample
+        with open(data_path + 'train.all.origin.csv', 'w', newline='') as csvfile:  # newline防止每两行就空一行
+            spamwriter = csv.writer(csvfile, dialect='excel')  # 读要转换的txt文件，文件每行各词间以@@@字符分隔
+            with open(data_path + file_name, 'r') as filein:
+                for i, line in enumerate(filein):
+                    line_list = line.strip('\n').split('\t')
+                    spamwriter.writerow(line_list)
+        print('train-data读写完毕')
 
-    rand_sample(data_path)
-    to_libsvm_encode(data_path, 'rand', time_frac_dict)
+        file_name = 'train.all.origin.csv'
+        train_data_path = data_path + file_name
+
+        day_to_weekday = {4: '6', 5: '7', 6: '8', 0: '9', 1: '10', 2: '11', 3: '12'}
+        train_data = pd.read_csv(train_data_path)
+        train_data.iloc[:, 1] = train_data.iloc[:, 1].astype(int)
+
+        print('###### separate datas from train day ######\n')
+        day_data_indexs = []
+        for key in day_to_weekday.keys():
+            day_datas = train_data[train_data.iloc[:, 1] == key]
+            day_indexs = day_datas.index
+            day_data_indexs.append([int(day_to_weekday[key]), int(day_indexs[0]), int(day_indexs[-1])])
+
+        day_data_indexs_df = pd.DataFrame(data=day_data_indexs)
+        day_data_indexs_df.to_csv(data_path + 'day_indexs.csv', index=None, header=None)
+
+        day_indexs = pd.read_csv(data_path + 'day_indexs.csv', header=None).values.astype(int)
+        train_indexs = day_indexs[day_indexs[:, 0] == 11][0]
+        test_indexs = day_indexs[day_indexs[:, 0] == 12][0]
+
+        origin_train_data = pd.read_csv(data_path + 'train.all.origin.csv')
+
+        train_data = origin_train_data.iloc[:train_indexs[1], :] # 6-10
+        val_data = origin_train_data.iloc[train_indexs[1]: train_indexs[2] + 1, :] # 11
+        test_data = origin_train_data.iloc[train_indexs[2]:, :] # 12
+
+        train_data.to_csv(data_path + 'train.bid.all.csv', index=None)
+        val_data.to_csv(data_path + 'val.bid.all.csv', index=None)
+        test_data.to_csv(data_path + 'test.bid.all.csv', index=None)
+
+    to_libsvm_encode(data_path, 'all', time_frac_dict)
+
 
 
 
