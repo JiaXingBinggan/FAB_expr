@@ -313,7 +313,6 @@ class TD3_Model():
         # sample
         choose_idx, batch_memory, ISweights = self.memory.stochastic_sample(self.batch_size)
         # if self.memory.memory_counter > self.memory_size:
-        #     # replacement 代表的意思是抽样之后还放不放回去，如果是False的话，那么出来的三个数都不一样，如果是True的话， 有可能会出现重复的，因为前面的抽的放回去了
         #     sample_index = random.sample(range(self.memory_size), self.batch_size)
         # else:
         #     sample_index = random.sample(range(self.memory.memory_counter), self.batch_size)

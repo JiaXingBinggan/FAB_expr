@@ -16,8 +16,7 @@ def init_parser(campaign_id):
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', default='../../data/')
     parser.add_argument('--dataset_name', default='ipinyou/', help='ipinyou, cretio, yoyi, avazu')
-    parser.add_argument('--campaign_id', default='1458/', help='1458, 3358, 3386, 3427, 3476, avazu')
-    parser.add_argument('--ctr_model_name', default='LR', help='LR,FM,FNN...')
+    parser.add_argument('--campaign_id', default='1458/', help='1458, 3427')
     parser.add_argument('--episodes', type=int, default=3000)
     parser.add_argument('--model_name', default='FAB')
     parser.add_argument('--lr_A', type=float, default=3e-4)
@@ -32,13 +31,13 @@ def init_parser(campaign_id):
     parser.add_argument('--save_log_dir', default='logs/')
     parser.add_argument('--seed', type=int, default=1)
 
-    parser.add_argument('--sample_type', default='all', help='all, rand')
+    parser.add_argument('--sample_type', default='all', help='all')
 
     parser.add_argument('--budget', type=float, default=16e6)
-    parser.add_argument('--budget_para', type=list, default=[1/8], help='1,2,4,8')
+    parser.add_argument('--budget_para', type=list, default=[1/8], help='1,2,4,8') # 预算调整比例
 
     parser.add_argument('--reward_type', type=str, default='nop_2.0', help='op, nop_2.0, clk')
-    # op 缩放，nop 不缩放，clk
+    # op 缩放，nop 不缩放，clk, 直接使用点击数做奖励
 
     args = parser.parse_args()
     args.campaign_id = campaign_id
