@@ -144,7 +144,7 @@ def get_dataset(args):
     train_data = train_data[['clk', 'ctr', 'mprice', 'hour']].values.astype(float)
     test_data = test_data[['clk', 'ctr', 'mprice', 'hour']].values.astype(float)
 
-    ecpc = np.sum(train_data[:, 0]) / np.sum(train_data[:, 2])
+    ecpc = np.sum(train_data[:, 2]) / np.sum(train_data[:, 0])
     origin_ctr = np.sum(train_data[:, 0]) / len(train_data)
     avg_mprice = np.sum(train_data[:, 2]) / len(train_data)
 
